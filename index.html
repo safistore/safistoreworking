@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="SafiStore - Premium Multi-Category E-Commerce Platform. Shop Electronics, Mobiles, Fashion, and Home essentials with huge discounts.">
+  <meta name="keywords" content="e-commerce, safistore, mobiles, electronics, fashion, home decor, online shopping">
+  <title>SafiStore - India's Premium Online Retail Store</title>
+  
+  <!-- CSS Stylesheet -->
+  <link rel="stylesheet" href="style.css">
+  
+  <!-- Firebase SDK Compat (file:// support) -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+
+  <!-- ==========================================
+       HEADER & NAVIGATION
+       ========================================== -->
+  <header>
+    <div class="container top-header">
+      <!-- Logo -->
+      <a href="index.html" class="logo">
+        <i data-lucide="shopping-bag" style="stroke: #ff9900; fill: #ff9900;"></i> Safi<span>Store</span>
+      </a>
+
+      <!-- Pin Code Display -->
+      <div class="header-action-btn pincode-selector-btn" style="cursor: pointer; font-size: 13px;">
+        <i data-lucide="map-pin" style="color: #ff9900;"></i>
+        <div style="text-align: left;">
+          <span style="display: block; font-size: 10px; opacity: 0.8;">Deliver to</span>
+          <span id="header-pincode" style="font-weight: 700;">Select location</span>
+        </div>
+      </div>
+
+      <!-- Search Bar -->
+      <div class="search-container">
+        <input type="text" id="search-input" class="search-input" placeholder="Search for products, brands and more...">
+        <button id="search-btn" class="search-btn">
+          <i data-lucide="search"></i>
+        </button>
+        <!-- Suggestions Autocomplete -->
+        <div id="search-suggestions" class="search-suggestions"></div>
+      </div>
+
+      <!-- Actions -->
+      <div class="header-actions">
+        <!-- Database Status -->
+        <div id="db-status-container" style="font-size: 11px; color: var(--text-light); padding: 4px 8px; border-radius: var(--radius-sm); border: 1px solid rgba(255,255,255,0.25); display: flex; align-items: center; gap: 6px; cursor: default;" title="Firebase Database Status">
+          <span id="db-status-dot" style="width: 8px; height: 8px; border-radius: 50%; background-color: #ff9900; display: inline-block;"></span>
+          <span id="db-status-text">Connecting</span>
+        </div>
+
+        <!-- Theme Toggle -->
+        <button id="theme-toggle" class="theme-toggle-btn" title="Toggle Theme">
+          <i data-lucide="moon"></i>
+        </button>
+
+        <!-- Account Sign-in (Directs to Admin Panel) -->
+        <a href="admin.html" target="_blank" class="header-action-btn" id="account-btn" style="display: flex; align-items: center; gap: 6px;">
+          <i data-lucide="user"></i>
+          <span>Sign In</span>
+        </a>
+
+        <!-- Cart Icon -->
+        <button class="header-action-btn cart-icon-container" id="cart-toggle-btn">
+          <i data-lucide="shopping-cart"></i>
+          <span>Cart</span>
+          <span id="cart-count" class="cart-badge">0</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Sub Header Nav -->
+    <nav class="sub-header">
+      <div class="container">
+        <ul class="sub-menu" style="width: 100%;">
+          <li class="sub-menu-item active" data-category="All">All</li>
+          <li class="sub-menu-item" data-category="Mobiles"><i data-lucide="smartphone"></i> Mobiles</li>
+          <li class="sub-menu-item" data-category="Electronics"><i data-lucide="laptop"></i> Electronics</li>
+          <li class="sub-menu-item" data-category="Fashion"><i data-lucide="shirt"></i> Fashion</li>
+          <li class="sub-menu-item" data-category="Home & Living"><i data-lucide="home"></i> Home & Kitchen</li>
+          <li class="sub-menu-item" style="margin-left: auto; font-weight: 700;">
+            <a href="admin.html" target="_blank" style="display: flex; align-items: center; gap: 4px; color: var(--secondary-color);"><i data-lucide="shield-alert" style="width: 14px; height: 14px;"></i> Admin Panel</a>
+          </li>
+        </ul>
+      </div>
+    </nav>
+  </header>
+
+  <!-- ==========================================
+       CATEGORY CIRCLES BAR
+       ========================================== -->
+  <section class="category-circles-section">
+    <div class="container circles-wrapper">
+      <div class="category-circle-card" data-category="Mobiles">
+        <div class="circle-img-container">
+          <img src="https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&q=80&w=150" alt="Mobiles">
+        </div>
+        <span class="circle-title">Mobiles</span>
+      </div>
+      <div class="category-circle-card" data-category="Electronics">
+        <div class="circle-img-container">
+          <img src="https://images.unsplash.com/photo-1498049794561-7780e7231661?auto=format&fit=crop&q=80&w=150" alt="Electronics">
+        </div>
+        <span class="circle-title">Electronics</span>
+      </div>
+      <div class="category-circle-card" data-category="Fashion">
+        <div class="circle-img-container">
+          <img src="https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&q=80&w=150" alt="Fashion">
+        </div>
+        <span class="circle-title">Fashion</span>
+      </div>
+      <div class="category-circle-card" data-category="Home & Living">
+        <div class="circle-img-container">
+          <img src="https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&q=80&w=150" alt="Home">
+        </div>
+        <span class="circle-title">Home</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==========================================
+       BANNER CAROUSEL
+       ========================================== -->
+  <section class="container carousel-section">
+    <div class="carousel-container">
+      <!-- Slide 1 -->
+      <div class="carousel-slide active" style="background-image: linear-gradient(rgba(0,0,0,0.1), rgba(0,0,0,0.4)), url('https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?auto=format&fit=crop&q=80&w=1000');">
+        <div class="slide-content">
+          <h2>Safi Big Saving Days</h2>
+          <p>Unbelievable deals on Mobiles & Tech items. Get up to 60% instant off on select card payments.</p>
+          <button class="slide-btn shop-now-banner-btn">Shop Now</button>
+        </div>
+      </div>
+      <!-- Slide 2 -->
+      <div class="carousel-slide" style="background-image: linear-gradient(rgba(0,0,0,0.1), rgba(0,0,0,0.4)), url('https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&q=80&w=1000');">
+        <div class="slide-content">
+          <h2>Upgrade Your Wardrobe</h2>
+          <p>Explore premium hoodies, classic jackets, and sleek timepieces starting at just ₹999.</p>
+          <button class="slide-btn shop-now-banner-btn">Shop Fashion</button>
+        </div>
+      </div>
+      <!-- Slide 3 -->
+      <div class="carousel-slide" style="background-image: linear-gradient(rgba(0,0,0,0.1), rgba(0,0,0,0.4)), url('https://images.unsplash.com/photo-1556911220-e15b29be8c8f?auto=format&fit=crop&q=80&w=1000');">
+        <div class="slide-content">
+          <h2>Transform Your Kitchen</h2>
+          <p>Up to 50% discount on coffee makers, smart desk lights, and ergonomic workspace support.</p>
+          <button class="slide-btn shop-now-banner-btn">Browse Kitchen</button>
+        </div>
+      </div>
+
+      <!-- Controls -->
+      <button class="carousel-nav-btn carousel-prev-btn"><i data-lucide="chevron-left"></i></button>
+      <button class="carousel-nav-btn carousel-next-btn"><i data-lucide="chevron-right"></i></button>
+      
+      <!-- Dots -->
+      <div class="carousel-dots">
+        <span class="dot active"></span>
+        <span class="dot"></span>
+        <span class="dot"></span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==========================================
+       MAIN MARKETPLACE LAYOUT
+       ========================================== -->
+  <main class="container main-layout">
+    <!-- Sidebar Filters -->
+    <aside class="filter-sidebar">
+      <div class="filter-title-section">
+        <span class="filter-title">Filters</span>
+        <button id="clear-filters-btn" class="clear-filters-btn">Clear All</button>
+      </div>
+
+      <!-- Category Filter -->
+      <div class="filter-group">
+        <span class="filter-group-title">Category</span>
+        <div class="filter-list">
+          <label class="filter-list-item">
+            <input type="checkbox" class="category-checkbox" value="Mobiles">
+            Mobiles
+          </label>
+          <label class="filter-list-item">
+            <input type="checkbox" class="category-checkbox" value="Electronics">
+            Electronics
+          </label>
+          <label class="filter-list-item">
+            <input type="checkbox" class="category-checkbox" value="Fashion">
+            Fashion
+          </label>
+          <label class="filter-list-item">
+            <input type="checkbox" class="category-checkbox" value="Home & Living">
+            Home & Kitchen
+          </label>
+        </div>
+      </div>
+
+      <!-- Price Range Filter -->
+      <div class="filter-group">
+        <span class="filter-group-title">Price Range</span>
+        <div class="price-slider-container">
+          <div class="price-range-inputs">
+            <select id="price-min-select">
+              <option value="0">Min</option>
+              <option value="1000">₹1,000</option>
+              <option value="5000">₹5,000</option>
+              <option value="10000">₹10,000</option>
+              <option value="50000">₹50,000</option>
+            </select>
+            <span>to</span>
+            <select id="price-max-select">
+              <option value="999999">Max</option>
+              <option value="5000">₹5,000</option>
+              <option value="10000">₹10,000</option>
+              <option value="50000">₹50,000</option>
+              <option value="100000">₹1,00,000</option>
+              <option value="150000">₹1,50,000</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Customer Ratings Filter -->
+      <div class="filter-group">
+        <span class="filter-group-title">Customer Ratings</span>
+        <div class="filter-list">
+          <label class="filter-list-item">
+            <input type="checkbox" class="rating-checkbox" value="4">
+            <span class="rating-stars">4★ & above</span>
+          </label>
+          <label class="filter-list-item">
+            <input type="checkbox" class="rating-checkbox" value="3">
+            <span class="rating-stars">3★ & above</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Discount Filter -->
+      <div class="filter-group">
+        <span class="filter-group-title">Discount</span>
+        <div class="filter-list">
+          <label class="filter-list-item">
+            <input type="checkbox" class="discount-checkbox" value="30">
+            30% or more
+          </label>
+          <label class="filter-list-item">
+            <input type="checkbox" class="discount-checkbox" value="40">
+            40% or more
+          </label>
+          <label class="filter-list-item">
+            <input type="checkbox" class="discount-checkbox" value="50">
+            50% or more
+          </label>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Product Grid Listing -->
+    <section class="products-display">
+      <div class="section-header">
+        <div class="section-title-wrapper">
+          <h2 id="catalog-title">Deal of the Day</h2>
+          <div id="deal-timer-container" class="countdown-timer">
+            <i data-lucide="timer" style="width: 16px; height: 16px;"></i> Ends in <span id="deal-timer">02:45:10</span>
+          </div>
+        </div>
+        <!-- Sorting -->
+        <div class="sort-selector-wrapper" style="font-size: 13px; display: flex; align-items: center; gap: 8px;">
+          <span style="color: var(--text-secondary);">Sort By:</span>
+          <select id="sort-select" style="background: var(--card-bg); color: var(--text-primary); border: 1px solid var(--border-color); padding: 4px 8px; border-radius: var(--radius-sm);">
+            <option value="popularity">Popularity</option>
+            <option value="price-low">Price: Low to High</option>
+            <option value="price-high">Price: High to Low</option>
+            <option value="rating">Customer Rating</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Main Grid -->
+      <div id="products-grid" class="products-grid">
+        <!-- Rendered dynamically by JavaScript -->
+      </div>
+    </section>
+  </main>
+
+  <!-- ==========================================
+       SHOPPING CART DRAWER (Slideout)
+       ========================================== -->
+  <div class="cart-drawer-overlay" id="cart-drawer-overlay">
+    <div class="cart-drawer">
+      <div class="cart-drawer-header">
+        <span class="cart-drawer-title"><i data-lucide="shopping-cart"></i> Your Cart</span>
+        <button id="close-cart-btn" class="close-cart-btn"><i data-lucide="x"></i></button>
+      </div>
+
+      <!-- Shipping status progress bar -->
+      <div class="shipping-progress-bar-container">
+        <div id="shipping-status-text" class="shipping-status-text">
+          Add <span id="shipping-threshold-diff">₹4,999</span> more for <span>Free Shipping!</span>
+        </div>
+        <div class="progress-track">
+          <div id="shipping-progress-fill" class="progress-fill"></div>
+        </div>
+      </div>
+
+      <!-- Items List -->
+      <div id="cart-items-list" class="cart-items-list">
+        <!-- Rendered dynamically by JavaScript -->
+      </div>
+
+      <!-- Footer & Calculations -->
+      <div class="cart-drawer-footer">
+        <!-- Promo Coupon code -->
+        <div class="promo-container">
+          <input type="text" id="promo-input" class="promo-input" placeholder="Enter coupon code (e.g. SAFI20)">
+          <button id="promo-apply-btn" class="promo-btn">Apply</button>
+        </div>
+        <div id="promo-msg" class="promo-message"></div>
+
+        <div class="summary-row">
+          <span>Subtotal</span>
+          <span id="cart-subtotal">₹0</span>
+        </div>
+        <div class="summary-row" id="cart-discount-row" style="display: none; color: var(--success-color);">
+          <span>Discount (20% off)</span>
+          <span id="cart-discount">-₹0</span>
+        </div>
+        <div class="summary-row">
+          <span>Delivery Charges</span>
+          <span id="cart-delivery-cost">₹149</span>
+        </div>
+        <div class="summary-row total">
+          <span>Total Amount</span>
+          <span id="cart-total-cost">₹0</span>
+        </div>
+
+        <button id="proceed-checkout-btn" class="checkout-btn">
+          Proceed to Checkout <i data-lucide="arrow-right"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==========================================
+       PRODUCT DETAIL MODAL
+       ========================================== -->
+  <div class="modal-overlay" id="product-detail-modal">
+    <div class="modal-content">
+      <button class="close-modal-btn" id="close-detail-modal-btn"><i data-lucide="x"></i></button>
+      <div class="product-detail-layout">
+        
+        <!-- Gallery -->
+        <div class="product-detail-gallery">
+          <div class="main-preview-img-container">
+            <img id="detail-main-img" src="" alt="Product Main Image">
+          </div>
+          <div class="gallery-thumbnails" id="detail-thumbnails-container">
+            <!-- Thumbnail list -->
+          </div>
+        </div>
+
+        <!-- Details Info -->
+        <div class="product-detail-info">
+          <span id="detail-brand" class="detail-brand">Brand Name</span>
+          <h2 id="detail-name" class="detail-name">Product Name</h2>
+          
+          <div class="detail-rating-row">
+            <span id="detail-rating-badge" class="rating-badge">4.5 <i data-lucide="star" style="width: 12px; height: 12px; fill: white; stroke: white;"></i></span>
+            <span id="detail-reviews-count" class="reviews-count">1,234 reviews</span>
+          </div>
+
+          <div class="detail-price-panel">
+            <div class="detail-price-row">
+              <span id="detail-price" class="detail-price">₹19,999</span>
+              <span id="detail-mrp" class="detail-mrp">₹24,999</span>
+              <span id="detail-discount" class="detail-discount">20% off</span>
+            </div>
+            <div class="detail-tax-notice">inclusive of all taxes</div>
+          </div>
+
+          <p id="detail-desc" class="detail-desc">Full long product description text goes here.</p>
+
+          <!-- Delivery Pincode Checker -->
+          <div class="pincode-checker">
+            <div class="pincode-title"><i data-lucide="truck"></i> Check Delivery Availability</div>
+            <div class="pincode-input-row">
+              <input type="text" id="pincode-check-input" class="pincode-input" placeholder="Enter Pincode (e.g. 560001)">
+              <button id="pincode-check-btn" class="pincode-btn">Check</button>
+            </div>
+            <div id="pincode-result" class="pincode-result">Delivery available in 3 days.</div>
+          </div>
+
+          <!-- Actions -->
+          <div class="detail-actions-row">
+            <button id="modal-add-to-cart-btn" class="btn-add-to-cart">
+              <i data-lucide="shopping-cart"></i> Add to Cart
+            </button>
+            <button id="modal-buy-now-btn" class="btn-buy-now">
+              <i data-lucide="zap"></i> Buy Now
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Specs & Reviews Tabs -->
+      <div class="detail-tabs">
+        <div class="tabs-headers">
+          <button class="tab-link active" data-tab="specs-pane">Specifications</button>
+          <button class="tab-link" data-tab="reviews-pane">Reviews</button>
+        </div>
+        
+        <!-- Specs Pane -->
+        <div class="tab-pane active" id="specs-pane">
+          <table class="specs-table" id="detail-specs-table">
+            <!-- Dynamic Spec Rows -->
+          </table>
+        </div>
+
+        <!-- Reviews Pane -->
+        <div class="tab-pane" id="reviews-pane">
+          <div class="reviews-pane">
+            <div id="reviews-list-container">
+              <!-- Reviews List -->
+            </div>
+            <!-- Add review form -->
+            <div class="add-review-form">
+              <span class="add-review-title">Write a Review</span>
+              <div class="rating-select-row">
+                <span>Your Rating:</span>
+                <div class="rating-select-stars" id="rating-selector">
+                  <i data-lucide="star" class="star-select" data-rating="1"></i>
+                  <i data-lucide="star" class="star-select" data-rating="2"></i>
+                  <i data-lucide="star" class="star-select" data-rating="3"></i>
+                  <i data-lucide="star" class="star-select" data-rating="4"></i>
+                  <i data-lucide="star" class="star-select" data-rating="5"></i>
+                </div>
+              </div>
+              <textarea id="review-comment-input" class="review-textarea" placeholder="Share your experience with this product..."></textarea>
+              <button id="submit-review-btn" class="submit-review-btn">Submit Review</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+
+  <!-- ==========================================
+       TOAST CONTAINER
+       ========================================== -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <!-- ==========================================
+       FOOTER SECTION
+       ========================================== -->
+  <footer>
+    <div class="container footer-layout">
+      <div class="footer-col">
+        <h4>Get to Know Us</h4>
+        <ul>
+          <li><a href="#">About SafiStore</a></li>
+          <li><a href="#">Careers</a></li>
+          <li><a href="#">Press Releases</a></li>
+          <li><a href="#">Corporate Responsibility</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Connect with Us</h4>
+        <ul>
+          <li><a href="#">Facebook</a></li>
+          <li><a href="#">Twitter (X)</a></li>
+          <li><a href="#">Instagram</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Make Money with Us</h4>
+        <ul>
+          <li><a href="#">Sell on SafiStore</a></li>
+          <li><a href="#">Supply to SafiStore</a></li>
+          <li><a href="#">Become an Affiliate</a></li>
+          <li><a href="#">Fulfillment by SafiStore</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Let Us Help You</h4>
+        <ul>
+          <li><a href="#">Your Account</a></li>
+          <li><a href="#">Returns Center</a></li>
+          <li><a href="#">100% Purchase Protection</a></li>
+          <li><a href="#">Help & Support</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>&copy; 2026 SafiStore.com, Inc. or its affiliates. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="products.js"></script>
+  <script src="firebase-db.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

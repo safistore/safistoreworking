@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SafiStore - Secure Checkout</title>
+  
+  <!-- CSS Stylesheet (Shared) -->
+  <link rel="stylesheet" href="style.css">
+  
+  <!-- Checkout Specific Styles -->
+  <style>
+    .checkout-body {
+      background-color: #f3f4f6;
+      color: #1f2937;
+    }
+    body.dark-theme .checkout-body {
+      background-color: #0f1115;
+      color: #e3e6e6;
+    }
+    
+    .checkout-header {
+      background-color: var(--card-bg);
+      border-bottom: 1px solid var(--border-color);
+      padding: 15px 0;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      transition: background-color var(--transition-normal);
+    }
+    .checkout-header-flex {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .secure-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    
+    .checkout-layout {
+      display: grid;
+      grid-template-columns: 1fr 380px;
+      gap: 24px;
+      margin: 30px 0;
+      align-items: start;
+    }
+    
+    .checkout-card {
+      background-color: var(--card-bg);
+      border-radius: var(--radius-md);
+      padding: 24px;
+      box-shadow: var(--shadow-sm);
+      transition: background-color var(--transition-normal);
+      margin-bottom: 20px;
+    }
+    
+    /* Stepper Header Override */
+    .stepper {
+      margin-bottom: 30px;
+    }
+    
+    /* Order Summary Item */
+    .summary-item-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      font-size: 13px;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--border-color);
+    }
+    .summary-item-row:last-child {
+      border-bottom: none;
+    }
+    .summary-item-name {
+      font-weight: 500;
+      color: var(--text-primary);
+    }
+    .summary-item-qty {
+      color: var(--text-secondary);
+    }
+    
+    @media (max-width: 992px) {
+      .checkout-layout {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+  
+  <!-- Firebase SDK Compat -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+  
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="checkout-body">
+
+  <!-- ==========================================
+       SECURE HEADER
+       ========================================== -->
+  <header class="checkout-header">
+    <div class="container checkout-header-flex">
+      <a href="index.html" class="logo" style="font-size: 20px;">
+        <i data-lucide="shopping-bag" style="stroke: #ff9900; fill: #ff9900;"></i> Safi<span>Store</span>
+      </a>
+      <div class="secure-title">
+        <i data-lucide="lock" style="color: var(--success-color); width: 18px; height: 18px;"></i> Secure Checkout
+      </div>
+    </div>
+  </header>
+
+  <!-- ==========================================
+       CHECKOUT CONTENT LAYOUT
+       ========================================== -->
+  <div class="container">
+    <div class="checkout-layout">
+      
+      <!-- Left Panel: Stepper forms -->
+      <main>
+        <div class="checkout-card">
+          <!-- Stepper Progress Header -->
+          <div class="stepper">
+            <div class="step-node active" id="step-node-1">
+              1
+              <span class="step-label">Delivery Address</span>
+            </div>
+            <div class="step-node" id="step-node-2">
+              2
+              <span class="step-label">Payment Mode</span>
+            </div>
+            <div class="step-node" id="step-node-3">
+              3
+              <span class="step-label">Order Receipt</span>
+            </div>
+          </div>
+
+          <!-- Step 1 Pane: Address Form -->
+          <div class="checkout-step-pane active" id="checkout-step-1">
+            <h3 style="margin-bottom: 20px;">Delivery Address</h3>
+            <form id="address-form">
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="address-name">Full Name</label>
+                  <input type="text" id="address-name" class="form-control" placeholder="Aarav Sharma" required>
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="address-line">Street Address / House No.</label>
+                  <input type="text" id="address-line" class="form-control" placeholder="Flat 405, Block B, Green Glen Layout" required>
+                </div>
+              </div>
+              <div class="form-row two-col">
+                <div class="form-group">
+                  <label for="address-city">City</label>
+                  <input type="text" id="address-city" class="form-control" placeholder="Bengaluru" required>
+                </div>
+                <div class="form-group">
+                  <label for="address-pincode">Pincode</label>
+                  <input type="text" id="address-pincode" class="form-control" placeholder="560103" maxlength="6" required>
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="address-phone">Mobile Number</label>
+                  <input type="tel" id="address-phone" class="form-control" placeholder="9876543210" maxlength="10" required>
+                </div>
+              </div>
+            </form>
+          </div>
+
+          <!-- Step 2 Pane: Payment Selector & Credit Card Simulator -->
+          <div class="checkout-step-pane" id="checkout-step-2" style="display: none;">
+            <h3 style="margin-bottom: 20px;">Select Payment Mode</h3>
+            
+            <div class="payment-selector">
+              <label class="payment-option-card active" data-payment="cod">
+                <input type="radio" name="payment-method" value="cod" checked>
+                <div>
+                  <span style="font-weight: 700; display: block;">Cash on Delivery (COD)</span>
+                  <span style="font-size: 12px; color: var(--text-secondary);">Pay in cash or scan digital UPI upon delivery.</span>
+                </div>
+              </label>
+              
+              <label class="payment-option-card" data-payment="card">
+                <input type="radio" name="payment-method" value="card">
+                <div>
+                  <span style="font-weight: 700; display: block;">Credit / Debit Card</span>
+                  <span style="font-size: 12px; color: var(--text-secondary);">Safe and secure payment gateway.</span>
+                </div>
+              </label>
+
+              <label class="payment-option-card" data-payment="upi">
+                <input type="radio" name="payment-method" value="upi">
+                <div>
+                  <span style="font-weight: 700; display: block;">UPI (Google Pay, PhonePe, Paytm)</span>
+                  <span style="font-size: 12px; color: var(--text-secondary);">Instant bank-to-bank mobile payment.</span>
+                </div>
+              </label>
+            </div>
+
+            <!-- Simulated Card Details -->
+            <div class="payment-card-details" id="card-details-panel" style="display: none;">
+              <!-- Credit Card Flip Visualizer -->
+              <div class="card-wrapper">
+                <div class="credit-card-sim" id="card-sim">
+                  <!-- Front Face -->
+                  <div class="card-face front">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                      <div class="card-chip"></div>
+                      <span style="font-style: italic; font-weight: bold; font-size: 18px;">Visa</span>
+                    </div>
+                    <div class="card-num-sim" id="card-num-display">•••• •••• •••• ••••</div>
+                    <div class="card-holder-info">
+                      <div>
+                        <span style="display: block; opacity: 0.7; font-size: 8px;">CARD HOLDER</span>
+                        <span class="card-holder-name" id="card-name-display">YOUR NAME</span>
+                      </div>
+                      <div style="text-align: right;">
+                        <span style="display: block; opacity: 0.7; font-size: 8px;">EXPIRES</span>
+                        <span style="font-weight: 700;" id="card-expiry-display">MM/YY</span>
+                      </div>
+                    </div>
+                  </div>
+                  <!-- Back Face -->
+                  <div class="card-face back">
+                    <div class="card-magnetic-strip"></div>
+                    <div class="card-signature-bar" id="card-cvv-display">CVV</div>
+                    <div style="padding: 10px 20px; font-size: 8px; opacity: 0.6; text-align: right;">Authorized Signature</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Card Form Inputs -->
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="card-number">Card Number</label>
+                  <input type="text" id="card-number" class="form-control" placeholder="4111 2222 3333 4444" maxlength="19">
+                </div>
+              </div>
+              <div class="form-row two-col">
+                <div class="form-group">
+                  <label for="card-expiry">Expiry Date</label>
+                  <input type="text" id="card-expiry" class="form-control" placeholder="MM/YY" maxlength="5">
+                </div>
+                <div class="form-group">
+                  <label for="card-cvv">CVV</label>
+                  <input type="password" id="card-cvv" class="form-control" placeholder="123" maxlength="3">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Step 3 Pane: Order Confirmation / Success Receipt -->
+          <div class="checkout-step-pane" id="checkout-step-3" style="display: none;">
+            <div class="order-success-pane">
+              <div class="success-icon-wrapper">
+                <i data-lucide="check"></i>
+              </div>
+              <h3 class="order-success-title">Order Placed Successfully!</h3>
+              <p style="font-size: 14px; color: var(--text-secondary);">Your package will arrive <span id="delivery-est-days" style="font-weight: 700; color: var(--primary-color);">soon</span>.</p>
+              
+              <!-- Mock Receipt -->
+              <div class="invoice-card">
+                <div class="invoice-header">
+                  <div>
+                    <strong>SafiStore Retail</strong><br>
+                    Invoice #: <span id="receipt-invoice-num">SF-9823412</span>
+                  </div>
+                  <div style="text-align: right;">
+                    Date: <span id="receipt-date">2026-06-20</span>
+                  </div>
+                </div>
+                <div class="invoice-items" id="receipt-items-container">
+                  <!-- Items list with prices -->
+                </div>
+                <div class="invoice-total-row">
+                  <span>Paid Total:</span>
+                  <span id="receipt-total-paid">₹0</span>
+                </div>
+              </div>
+              <p style="font-size: 12px; color: var(--text-secondary); line-height: 1.4;">A confirmation mail and tracking links have been sent to your registered address. Thank you for shopping with SafiStore!</p>
+              
+              <a href="index.html" class="checkout-next-btn" style="display: inline-block; text-align: center; max-width: 250px; margin-top: 24px; padding: 12px 30px;">
+                Continue Shopping
+              </a>
+            </div>
+          </div>
+
+          <!-- Action Footer Navigation -->
+          <div class="checkout-actions-row" id="checkout-actions-row" style="margin-top: 30px;">
+            <button class="checkout-back-btn" id="checkout-back-btn" style="display: none;">Back</button>
+            <button class="checkout-next-btn" id="checkout-next-btn" style="margin-left: auto;">Continue to Payment</button>
+          </div>
+        </div>
+      </main>
+
+      <!-- Right Panel: Sticky Order Summary -->
+      <aside class="checkout-card" id="summary-sidebar">
+        <div class="admin-card-title" style="font-size: 16px; font-weight: 700; margin-bottom: 16px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px;">
+          Order Items Review
+        </div>
+        
+        <!-- Cart review items -->
+        <div id="summary-items-list" style="max-height: 250px; overflow-y: auto; margin-bottom: 20px;">
+          <!-- Rendered dynamically -->
+        </div>
+
+        <div class="admin-card-title" style="font-size: 14px; font-weight: 700; margin-bottom: 12px; border-bottom: 1px solid var(--border-color); padding-bottom: 6px;">
+          Price Details
+        </div>
+        
+        <div class="summary-row">
+          <span>Items Subtotal</span>
+          <span id="summary-subtotal">₹0</span>
+        </div>
+        <div class="summary-row" id="summary-discount-row" style="display: none; color: var(--success-color);">
+          <span>Discount (Coupon applied)</span>
+          <span id="summary-discount">-₹0</span>
+        </div>
+        <div class="summary-row">
+          <span>Delivery Charges</span>
+          <span id="summary-delivery-cost">₹149</span>
+        </div>
+        <div class="summary-row total">
+          <span>Total Amount</span>
+          <span id="summary-total-cost">₹0</span>
+        </div>
+      </aside>
+
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <!-- Scripts -->
+  <script src="products.js"></script>
+  <script src="firebase-db.js"></script>
+  <script src="checkout.js"></script>
+</body>
+</html>

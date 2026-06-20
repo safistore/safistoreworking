@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SafiStore - Admin Inventory Management</title>
+  
+  <!-- CSS Stylesheet (Shared) -->
+  <link rel="stylesheet" href="style.css">
+  
+  <!-- Additional Dashboard Styles -->
+  <style>
+    .admin-body {
+      background-color: #f3f4f6;
+      color: #1f2937;
+    }
+    body.dark-theme .admin-body {
+      background-color: #0f1115;
+      color: #e3e6e6;
+    }
+    
+    /* Login Page */
+    .login-container {
+      max-width: 400px;
+      margin: 100px auto;
+      padding: 30px;
+      background-color: var(--card-bg);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-md);
+      text-align: center;
+      transition: background-color var(--transition-normal);
+    }
+    .login-logo {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--primary-color);
+      margin-bottom: 20px;
+    }
+    .login-title {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 20px;
+    }
+    
+    /* Dashboard Grid */
+    .dashboard-header {
+      background-color: var(--footer-bg);
+      color: #fff;
+      padding: 15px 0;
+      box-shadow: var(--shadow-sm);
+    }
+    .header-flex {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .admin-logout-btn {
+      background-color: rgba(255,255,255,0.1);
+      color: #fff;
+      padding: 8px 16px;
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      border: 1px solid rgba(255,255,255,0.2);
+    }
+    .admin-logout-btn:hover {
+      background-color: var(--error-color);
+      border-color: var(--error-color);
+    }
+    
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+      margin: 24px 0;
+    }
+    .stat-card {
+      background-color: var(--card-bg);
+      padding: 20px;
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      transition: background-color var(--transition-normal);
+    }
+    .stat-val {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--primary-color);
+    }
+    .stat-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    /* Workspace Layout */
+    .workspace-grid {
+      display: grid;
+      grid-template-columns: 420px 1fr;
+      gap: 20px;
+      margin-bottom: 40px;
+      align-items: start;
+    }
+    
+    .admin-card {
+      background-color: var(--card-bg);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-sm);
+      padding: 24px;
+      transition: background-color var(--transition-normal);
+    }
+    .admin-card-title {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 16px;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 10px;
+    }
+    
+    /* Dynamic Specs Builder */
+    .specs-builder-row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+    .specs-builder-row input {
+      flex: 1;
+    }
+    .add-spec-row-btn {
+      background-color: var(--primary-color);
+      color: #fff;
+      padding: 6px 12px;
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 16px;
+      display: inline-block;
+    }
+    .remove-spec-row-btn {
+      background-color: var(--error-color);
+      color: #fff;
+      padding: 0 10px;
+      border-radius: var(--radius-sm);
+      font-weight: bold;
+    }
+    
+    /* Table styling */
+    .inventory-table-container {
+      overflow-x: auto;
+    }
+    .inventory-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      text-align: left;
+    }
+    .inventory-table th, .inventory-table td {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border-color);
+    }
+    .inventory-table th {
+      background-color: var(--bg-color);
+      color: var(--text-secondary);
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 11px;
+    }
+    .inventory-table tr:hover {
+      background-color: rgba(0,0,0,0.02);
+    }
+    body.dark-theme .inventory-table tr:hover {
+      background-color: rgba(255,255,255,0.02);
+    }
+    
+    .inventory-thumb {
+      width: 44px;
+      height: 44px;
+      object-fit: cover;
+      border-radius: var(--radius-sm);
+      background-color: #fafafa;
+    }
+    
+    .delete-prod-btn {
+      background-color: #fee2e2;
+      color: var(--error-color);
+      padding: 6px 12px;
+      border-radius: var(--radius-sm);
+      font-weight: 600;
+      font-size: 12px;
+    }
+    .delete-prod-btn:hover {
+      background-color: #fecaca;
+    }
+    body.dark-theme .delete-prod-btn {
+      background-color: #3b1818;
+    }
+    body.dark-theme .delete-prod-btn:hover {
+      background-color: #581c1c;
+    }
+    
+    @media (max-width: 992px) {
+      .workspace-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+  
+  <!-- Firebase SDK Compat -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+  
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="admin-body">
+
+  <!-- ==========================================
+       ADMIN LOGIN VIEW
+       ========================================== -->
+  <div id="login-view" class="login-container">
+    <div class="login-logo">
+      <i data-lucide="shopping-bag" style="stroke: #ff9900; fill: #ff9900;"></i> SafiStore Admin
+    </div>
+    <div class="login-title">Dashboard Login</div>
+    <div class="form-group" style="margin-bottom: 20px; text-align: left;">
+      <label for="admin-password">Enter Admin Password</label>
+      <input type="password" id="admin-password" class="form-control" placeholder="••••••••" style="margin-top: 6px;" required>
+    </div>
+    <button id="admin-login-btn" class="checkout-next-btn" style="width: 100%; padding: 12px;">Access Dashboard</button>
+    <p style="font-size: 11px; color: var(--text-secondary); margin-top: 14px;">Hint: Default password is <strong>admin123</strong></p>
+  </div>
+
+  <!-- ==========================================
+       DASHBOARD MAIN VIEW
+       ========================================== -->
+  <div id="dashboard-view" style="display: none;">
+    <!-- Header -->
+    <header class="dashboard-header">
+      <div class="container header-flex">
+        <a href="index.html" class="logo" style="font-size: 20px;">
+          <i data-lucide="shopping-bag" style="stroke: #ff9900; fill: #ff9900;"></i> Safi<span>Store Dashboard</span>
+        </a>
+        <button id="admin-logout-btn" class="admin-logout-btn">Log Out</button>
+      </div>
+    </header>
+
+    <main class="container">
+      <!-- Quick Stats -->
+      <div class="stats-row">
+        <div class="stat-card">
+          <span class="stat-label">Total Inventory</span>
+          <span id="stat-products-count" class="stat-val">0</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-label">Database Mode</span>
+          <span id="stat-db-mode" class="stat-val" style="font-size: 20px; color: var(--success-color);">Firebase Live</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-label">Access Level</span>
+          <span class="stat-val" style="font-size: 20px; color: #ff9900;">Super Administrator</span>
+        </div>
+      </div>
+
+      <!-- Workspace grid -->
+      <div class="workspace-grid">
+        
+        <!-- Left: Add Product Form -->
+        <aside class="admin-card">
+          <div class="admin-card-title">Add New Product</div>
+          <form id="add-product-form">
+            
+            <div class="form-row" style="margin-bottom: 12px;">
+              <div class="form-group">
+                <label for="prod-id">Product ID (Unique)</label>
+                <input type="text" id="prod-id" class="form-control" placeholder="mob-4" required>
+              </div>
+            </div>
+
+            <div class="form-row" style="margin-bottom: 12px;">
+              <div class="form-group">
+                <label for="prod-name">Product Name</label>
+                <input type="text" id="prod-name" class="form-control" placeholder="iPad Pro 11-inch M4" required>
+              </div>
+            </div>
+
+            <div class="form-row two-col" style="margin-bottom: 12px;">
+              <div class="form-group">
+                <label for="prod-brand">Brand</label>
+                <input type="text" id="prod-brand" class="form-control" placeholder="Apple" required>
+              </div>
+              <div class="form-group">
+                <label for="prod-category">Category</label>
+                <select id="prod-category" class="form-control" required style="background: var(--bg-color); color: var(--text-primary);">
+                  <option value="Mobiles">Mobiles</option>
+                  <option value="Electronics">Electronics</option>
+                  <option value="Fashion">Fashion</option>
+                  <option value="Home & Living">Home & Kitchen</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-row two-col" style="margin-bottom: 12px;">
+              <div class="form-group">
+                <label for="prod-price">Price (INR)</label>
+                <input type="number" id="prod-price" class="form-control" placeholder="99900" required>
+              </div>
+              <div class="form-group">
+                <label for="prod-mrp">M.R.P. (INR)</label>
+                <input type="number" id="prod-mrp" class="form-control" placeholder="109900" required>
+              </div>
+            </div>
+
+            <div class="form-row" style="margin-bottom: 12px;">
+              <div class="form-group">
+                <label for="prod-img">Image URL</label>
+                <input type="url" id="prod-img" class="form-control" placeholder="https://images.unsplash.com/photo-..." required>
+                <div style="font-size: 10px; color: var(--text-secondary); margin-top: 4px;">
+                  Quick Presets: 
+                  <a href="#" class="preset-img-link" data-url="https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&q=80&w=400">Tech/Console</a> | 
+                  <a href="#" class="preset-img-link" data-url="https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&q=80&w=400">Smart Gadget</a> |
+                  <a href="#" class="preset-img-link" data-url="https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&q=80&w=400">Red Sneakers</a>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-row" style="margin-bottom: 16px;">
+              <div class="form-group">
+                <label for="prod-desc">Description</label>
+                <textarea id="prod-desc" class="form-control" style="height: 60px; resize: none;" placeholder="Full product details..." required></textarea>
+              </div>
+            </div>
+
+            <!-- Specs Builder -->
+            <label style="font-size: 12px; font-weight: 600; color: var(--text-secondary); display: block; margin-bottom: 8px;">Specifications</label>
+            <div id="specs-builder-container">
+              <div class="specs-builder-row">
+                <input type="text" class="form-control spec-key" placeholder="Key (e.g. Model)" required>
+                <input type="text" class="form-control spec-val" placeholder="Value (e.g. iPad Pro)" required>
+                <button type="button" class="remove-spec-row-btn" style="visibility: hidden;">×</button>
+              </div>
+            </div>
+            <button type="button" id="add-spec-row-btn" class="add-spec-row-btn">+ Add Spec Row</button>
+
+            <button type="submit" class="checkout-next-btn" style="width: 100%; padding: 12px; display: flex; align-items: center; justify-content: center; gap: 8px;">
+              <i data-lucide="plus-circle"></i> Add Product to Store
+            </button>
+          </form>
+        </aside>
+
+        <!-- Right: Current Inventory -->
+        <section class="admin-card">
+          <div class="admin-card-title" style="display: flex; justify-content: space-between; align-items: center;">
+            <span>Current Inventory list</span>
+            <input type="text" id="inventory-search" class="form-control" placeholder="Search inventory..." style="max-width: 250px; font-size: 13px; padding: 6px 12px;">
+          </div>
+          
+          <div class="inventory-table-container">
+            <table class="inventory-table">
+              <thead>
+                <tr>
+                  <th>Thumbnail</th>
+                  <th>ID</th>
+                  <th>Name</th>
+                  <th>Brand</th>
+                  <th>Category</th>
+                  <th>Price</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="inventory-table-body">
+                <!-- Rendered dynamically -->
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- Toast notifications -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <!-- Scripts -->
+  <script src="products.js"></script>
+  <script src="firebase-db.js"></script>
+  <script src="admin.js"></script>
+</body>
+</html>
