@@ -59,18 +59,27 @@ document.addEventListener("DOMContentLoaded", () => {
     elements.dashboardView.style.display = "block";
     loadAdminInventory();
   }
+   elements.adminLoginBtn.addEventListener("click", () => {
 
-  elements.adminLoginBtn.addEventListener("click", () => {
-    const pw = elements.adminPassword.value.trim();
-    if (pw === "admin123") {
-      sessionStorage.setItem("safistore_admin_logged_in", "true");
-      showDashboard();
-      elements.adminPassword.value = "";
-      showToast("Access Granted. Welcome Admin!", "success");
-    } else {
-      showToast("Access Denied. Incorrect Password.", "error");
-    }
-  });
+  const email = document.getElementById("admin-email").value.trim();
+  const password = document.getElementById("admin-password").value.trim();
+
+  if (
+    email === "safeekestore@gmail.com" &&
+    password === "safeek7879mrs"
+  ) {
+    sessionStorage.setItem("safistore_admin_logged_in", "true");
+    showDashboard();
+
+    document.getElementById("admin-email").value = "";
+    document.getElementById("admin-password").value = "";
+
+    showToast("Access Granted. Welcome Admin!", "success");
+
+  } else {
+    showToast("Invalid Email or Password", "error");
+  }
+});
 
   elements.adminPassword.addEventListener("keypress", (e) => {
     if (e.key === "Enter") {
