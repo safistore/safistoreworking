@@ -27,15 +27,7 @@ document.addEventListener("DOMContentLoaded", () => {
     paymentMethodRadios: document.getElementsByName("payment-method"),
     cardDetailsPanel: document.getElementById("card-details-panel"),
     
-    // Card simulator elements
-    cardSim: document.getElementById("card-sim"),
-    cardNumber: document.getElementById("card-number"),
-    cardExpiry: document.getElementById("card-expiry"),
-    cardCvv: document.getElementById("card-cvv"),
-    cardNumDisplay: document.getElementById("card-num-display"),
-    cardNameDisplay: document.getElementById("card-name-display"),
-    cardExpiryDisplay: document.getElementById("card-expiry-display"),
-    cardCvvDisplay: document.getElementById("card-cvv-display"),
+    
     
     // Summary
     summaryItemsList: document.getElementById("summary-items-list"),
