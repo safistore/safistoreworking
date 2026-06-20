@@ -293,73 +293,10 @@ document.addEventListener("DOMContentLoaded", () => {
       } else if (state.currentCheckoutStep === 2) {
         // Validate Card Details if Card payment is selected
         const selectedPayment = document.querySelector('input[name="payment-method"]:checked').value;
-        if (selectedPayment === "card") {
-          const num = elements.cardNumber.value.replace(/\s/g, "");
-          const exp = elements.cardExpiry.value;
-          const cvv = elements.cardCvv.value;
-          
-          if (num.length < 15 || exp.length < 5 || cvv.length < 3) {
-            showToast("Please enter complete credit card values.", "error");
-            return;
-          }
-        }
-        processOrderPlacement();
-      }
-    });
 
-    elements.checkoutBackBtn.addEventListener("click", () => {
-      if (state.currentCheckoutStep === 2) {
-        showCheckoutStep(1);
-      }
-    });
 
-    // Payment Option selection toggling
-    document.querySelectorAll(".payment-option-card").forEach(card => {
-      card.addEventListener("click", () => {
-        document.querySelectorAll(".payment-option-card").forEach(c => c.classList.remove("active"));
-        card.classList.add("active");
-        
-        const radio = card.querySelector('input[type="radio"]');
-        radio.checked = true;
 
-        if (radio.value === "card") {
-          elements.cardDetailsPanel.style.display = "block";
-        } else {
-          elements.cardDetailsPanel.style.display = "none";
-        }
-      });
-    });
-
-    // Credit Card simulated focus flip
-    elements.cardNumber.addEventListener("focus", () => elements.cardSim.classList.remove("flipped"));
-    elements.cardExpiry.addEventListener("focus", () => elements.cardSim.classList.remove("flipped"));
-    elements.cardCvv.addEventListener("focus", () => elements.cardSim.classList.add("flipped"));
-    elements.cardCvv.addEventListener("blur", () => elements.cardSim.classList.remove("flipped"));
-
-    // Form formatting filters
-    elements.cardNumber.addEventListener("input", (e) => {
-      let val = e.target.value.replace(/\D/g, "");
-      let parts = [];
-      for (let i = 0; i < val.length; i += 4) {
-        parts.push(val.substring(i, i + 4));
-      }
-      e.target.value = parts.join(" ");
-      elements.cardNumDisplay.innerText = e.target.value || "•••• •••• •••• ••••";
-    });
-
-    elements.cardExpiry.addEventListener("input", (e) => {
-      let val = e.target.value.replace(/\D/g, "");
-      if (val.length > 2) {
-        val = val.substring(0, 2) + "/" + val.substring(2, 4);
-      }
-      e.target.value = val;
-      elements.cardExpiryDisplay.innerText = val || "MM/YY";
-    });
-
-    elements.cardCvv.addEventListener("input", (e) => {
-      let val = e.target.value.replace(/\D/g, "");
-      elements.cardCvvDisplay.innerText = val || "CVV";
-    });
+    
 
     // Auto fill address input values if pincode selector was set in header of index
     if (state.userPincode) {
@@ -387,3 +324,5 @@ document.addEventListener("DOMContentLoaded", () => {
 
   init();
 });
+
+
